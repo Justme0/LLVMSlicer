@@ -15,7 +15,7 @@
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Intrinsics.h>
 #include <llvm/ADT/SetVector.h>
-#include <llvm/Support/InstIterator.h>
+#include <llvm/IR/InstIterator.h>
 #include <llvm/Support/raw_os_ostream.h>
 
 namespace llvm {

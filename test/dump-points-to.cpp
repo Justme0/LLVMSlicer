@@ -1,3 +1,4 @@
+#include <memory>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
@@ -74,17 +75,13 @@ int main(int argc, char **argv)
 {
 	LLVMContext context;
 	SMDiagnostic SMD;
-	Module *M;
-
-	M = ParseIRFile(argv[1], SMD, context);
-	if (!M) {
+	std::unique_ptr<llvm::Module> M = llvm::parseIRFile(argv[1], SMD, context);
+	if (nullptr == M) {
 		SMD.print(argv[0], errs());
 		return 1;
 	}
 
 	pointsTo(*M);
-
-	delete M;
 
 	return 0;
 }

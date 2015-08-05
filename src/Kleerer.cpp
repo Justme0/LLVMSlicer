@@ -6,10 +6,11 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/TypeBuilder.h"
-#include "llvm/Analysis/Verifier.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/Bitcode/ReaderWriter.h"
-#include "llvm/Support/InstIterator.h"
+#include "llvm/IR/InstIterator.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/ADT/StringRef.h"
 
 #include "Callgraph/Callgraph.h"
 #include "PointsTo/PointsTo.h"
@@ -201,12 +202,14 @@ void Kleerer::makeGlobalsSymbolic(Module &M, BasicBlock *BB) {
 
 Constant *Kleerer::get_assert_fail()
 {
-  Type *constCharPtrTy = TypeBuilder<const char *, false>::get(C);
-  AttributeSet attrs = AttributeSet().addAttribute(C,
-		  AttributeSet::FunctionIndex, Attribute::NoReturn);
-  return M.getOrInsertFunction("__assert_fail", attrs, Type::getVoidTy(C),
-                               constCharPtrTy, constCharPtrTy, uintType,
-                               constCharPtrTy, NULL);
+	Type *constCharPtrTy = TypeBuilder<const char *, false>::get(C);
+	// modified by jiangg 2015.07.31
+	llvm::AttributeSet attrs = llvm::AttributeSet().addAttribute(C,
+			llvm::AttributeSet::FunctionIndex, llvm::Attribute::NoReturn);
+
+	return M.getOrInsertFunction("__assert_fail", attrs, Type::getVoidTy(C),
+			constCharPtrTy, constCharPtrTy, uintType,
+			constCharPtrTy, NULL);
 }
 
 BasicBlock *Kleerer::checkAiState(Function *mainFun, BasicBlock *BB,
@@ -240,7 +243,7 @@ BasicBlock *Kleerer::checkAiState(Function *mainFun, BasicBlock *BB,
   return finalBB;
 }
 
-void Kleerer::addGlobals(Module &mainMod) {
+void Kleerer::addGlobals(Module & /*mainMod*/) {
   for (Module::global_iterator I = M.global_begin(), E = M.global_end();
        I != E; ++I) {
     GlobalVariable &G = *I;
@@ -354,62 +357,64 @@ void Kleerer::prepareArguments(Function &F, BasicBlock *mainBB,
 }
 
 void Kleerer::writeMain(Function &F) {
-  std::string name = M.getModuleIdentifier() + ".main." + F.getName().str() + ".o";
-  Function *mainFun = Function::Create(TypeBuilder<int(), false>::get(C),
-                    GlobalValue::ExternalLinkage, "main", &M);
-  BasicBlock *mainBB = BasicBlock::Create(C, "entry", mainFun);
+	std::string name = M.getModuleIdentifier() + ".main." + F.getName().str() + ".o";
+	Function *mainFun = Function::Create(TypeBuilder<int(), false>::get(C),
+			GlobalValue::ExternalLinkage, "main", &M);
+	BasicBlock *mainBB = BasicBlock::Create(C, "entry", mainFun);
 
-  FunctionType *klee_make_symbolicTy =
-      TypeBuilder<void(void *, size_t, const char *), false>::get(C);
-  klee_make_symbolic = dyn_cast<Function>(
-      M.getOrInsertFunction("klee_make_symbolic", klee_make_symbolicTy));
-  /* if there was one, it should have the same type, i.e. we got Function */
-  assert(klee_make_symbolic);
-/*  Function *klee_int = Function::Create(
-              TypeBuilder<int(const char *), false>::get(C),
-              GlobalValue::ExternalLinkage, "klee_int", &M);*/
+	FunctionType *klee_make_symbolicTy =
+		TypeBuilder<void(void *, size_t, const char *), false>::get(C);
+	klee_make_symbolic = dyn_cast<Function>(
+			M.getOrInsertFunction("klee_make_symbolic", klee_make_symbolicTy));
+	/* if there was one, it should have the same type, i.e. we got Function */
+	assert(klee_make_symbolic);
+	/*  Function *klee_int = Function::Create(
+	    TypeBuilder<int(const char *), false>::get(C),
+	    GlobalValue::ExternalLinkage, "klee_int", &M);*/
 
-//  F.dump();
+	//  F.dump();
 
-  std::vector<Value *> params;
-  prepareArguments(F, mainBB, params);
-//  mainFun->viewCFG();
+	std::vector<Value *> params;
+	prepareArguments(F, mainBB, params);
+	//  mainFun->viewCFG();
 
-  makeGlobalsSymbolic(M, mainBB);
-  addGlobals(M);
+	makeGlobalsSymbolic(M, mainBB);
+	addGlobals(M);
 #ifdef DEBUG_WRITE_MAIN
-  errs() << "==============\n";
-  errs() << mainMod;
-  errs() << "==============\n";
+	errs() << "==============\n";
+	errs() << mainMod;
+	errs() << "==============\n";
 #endif
-  check(&F, params);
+	check(&F, params);
 
-  CallInst::Create(&F, params, "", mainBB);
-  BasicBlock *final = checkAiState(mainFun, mainBB, F.back().back().getDebugLoc());
-  ReturnInst::Create(C, ConstantInt::get(mainFun->getReturnType(), 0),
-                     final);
+	CallInst::Create(&F, params, "", mainBB);
+	BasicBlock *final = checkAiState(mainFun, mainBB, F.back().back().getDebugLoc());
+	ReturnInst::Create(C, ConstantInt::get(mainFun->getReturnType(), 0),
+			final);
 
 #ifdef DEBUG_WRITE_MAIN
-  mainFun->viewCFG();
+	mainFun->viewCFG();
 #endif
 
-  std::string ErrorInfo;
-  raw_fd_ostream out(name.c_str(), ErrorInfo);
-  if (!ErrorInfo.empty()) {
-    errs() << __func__ << ": cannot write '" << name << "'!\n";
-    return;
-  }
+	std::error_code ErrorInfo;
+	raw_fd_ostream out(llvm::StringRef(name.c_str()), ErrorInfo, sys::fs::OpenFlags());
+	// should check ErrorInfo?
 
-//  errs() << mainMod;
+	//  if (!ErrorInfo.empty()) {
+	//    errs() << __func__ << ": cannot write '" << name << "'!\n";
+	//    return;
+	//  }
 
-  PassManager Passes;
-  Passes.add(createVerifierPass());
-  Passes.run(M);
+	//  errs() << mainMod;
 
-  WriteBitcodeToFile(&M, out);
-  errs() << __func__ << ": written: '" << name << "'\n";
-  mainFun->eraseFromParent();
-//  done = true;
+	PassManager Passes;
+	Passes.add(createVerifierPass());
+	Passes.run(M);
+
+	WriteBitcodeToFile(&M, out);
+	errs() << __func__ << ": written: '" << name << "'\n";
+	mainFun->eraseFromParent();
+	//  done = true;
 }
 
 bool Kleerer::run() {
@@ -430,8 +435,10 @@ bool Kleerer::run() {
     assert(CE->getOpcode() == Instruction::BitCast);
     Function &F = *cast<Function>(CE->getOperand(0));
 
-    callgraph::Callgraph::const_iterator II, EE;
-    llvm::tie(II, EE) = CG.calls(&F);
+    llvm::callgraph::Callgraph::range_iterator range = CG.calls(&F);
+    callgraph::Callgraph::const_iterator II = range.first;
+    callgraph::Callgraph::const_iterator EE = range.second;
+
     for (; II != EE; ++II) {
       const Function *callee = (*II).second;
       if (callee == F__assert_fail) {

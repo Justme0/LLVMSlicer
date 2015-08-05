@@ -9,7 +9,7 @@
 
 #include "llvm/IR/Value.h"
 #include "llvm/ADT/SetVector.h"
-#include "llvm/Support/InstIterator.h"
+#include "llvm/IR/InstIterator.h"
 
 #include "../PointsTo/PointsTo.h"
 #include "../Modifies/Modifies.h"
@@ -102,6 +102,7 @@ public:
   void addInitialCriterion(const llvm::Instruction *ins,
 			   const Pointee &cond = Pointee(0, 0),
 			   bool deslice = true) {
+	  (void)deslice;
     InsInfo *ii = getInsInfo(ins);
     if (cond.first)
       ii->addRC(cond);

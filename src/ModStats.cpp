@@ -5,7 +5,7 @@
 #include "llvm/Pass.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Analysis/LoopInfo.h"
-#include "llvm/Support/InstIterator.h"
+#include "llvm/IR/InstIterator.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include "Callgraph/Callgraph.h"
@@ -289,7 +289,7 @@ void StatsComputer::run() {
     const Function &F = *cast<Function>(CE->getOperand(0));
     FunInfo *funInfo = modInfo.getFunInfo(&F);
     callgraph::Callgraph::const_iterator II, EE;
-    llvm::tie(II, EE) = CG.calls(&F);
+    std::tie(II, EE) = CG.calls(&F);
 #ifdef DEBUG_NESTED
     errs() << "at " << F.getName() << " flags [" << getFlags(funInfo) << "]\n";
 #endif

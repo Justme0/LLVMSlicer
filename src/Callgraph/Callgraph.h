@@ -10,7 +10,6 @@
 #include <utility>
 
 #include "llvm/IR/Function.h"
-#include "llvm/ADT/STLExtras.h" /* tie */
 
 #include "../Languages/LLVM.h"
 #include "../Languages/LLVMSupport.h"
@@ -94,7 +93,7 @@ namespace llvm { namespace callgraph { namespace detail {
 
       for (typename Set::const_iterator it = S.begin(); it != S.end(); ++it) {
         typename Dict::const_iterator b,e;
-        llvm::tie(b,e) = D.equal_range(it->second);
+        std::tie(b,e) = D.equal_range(it->second);
         for ( ; b != e; ++b)
           S.insert(typename Set::value_type(it->first,b->second));
       }

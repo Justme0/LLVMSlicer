@@ -3,6 +3,8 @@
 
 #include "../PointsTo/PointsTo.h"
 #include "Callgraph.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/InstIterator.h"
 
 using namespace llvm;
 using namespace callgraph;

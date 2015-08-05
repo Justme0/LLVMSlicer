@@ -107,6 +107,7 @@ static std::unique_ptr<Module> build(LLVMContext &C, ToCheck &toCheck)
 
 	GlobalVariable *glob = new GlobalVariable(*M, Type::getInt32Ty(C),
 			false, GlobalValue::InternalLinkage, 0, "global");
+	(void)glob;
 
 	BasicBlock *entry = BasicBlock::Create(C, "entry", main);
 
@@ -165,7 +166,7 @@ static std::unique_ptr<Module> build(LLVMContext &C, ToCheck &toCheck)
 	return std::unique_ptr<Module>(M);
 }
 
-int main(int argc, char **argv)
+int main()
 {
 	LLVMContext context;
 	ToCheck toCheck;

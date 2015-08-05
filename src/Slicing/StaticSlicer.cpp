@@ -129,7 +129,7 @@ namespace llvm { namespace slicing {
         const ValSet::const_iterator relEnd = slicers[f]->relevant_end(entry);
 
         FuncsToCalls::const_iterator c, e;
-        llvm::tie(c, e) = funcsToCalls.equal_range(f);
+        std::tie(c, e) = funcsToCalls.equal_range(f);
 
         for ( ; c != e; ++c) {
 	    const CallInst *CI = c->second;
@@ -161,7 +161,7 @@ namespace llvm { namespace slicing {
                 slicers[f]->relevant_end(getSuccInBlock(*c));
 
             CallsToFuncs::const_iterator g, e;
-            llvm::tie(g, e) = callsToFuncs.equal_range(*c);
+            std::tie(g, e) = callsToFuncs.equal_range(*c);
 
             for ( ; g != e; ++g) {
                 typedef std::vector<const llvm::ReturnInst *> ExitsVec;

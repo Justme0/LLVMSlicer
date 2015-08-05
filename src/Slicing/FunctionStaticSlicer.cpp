@@ -22,8 +22,8 @@
 #include "llvm/IR/TypeBuilder.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Analysis/PostDominators.h"
-#include "llvm/Support/CFG.h"
-#include "llvm/Support/InstIterator.h"
+#include "llvm/IR/CFG.h"
+#include "llvm/IR/InstIterator.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Utils/BasicBlockUtils.h"
 
@@ -681,7 +681,7 @@ void FunctionStaticSlicer::removeUndefBranches(ModulePass *MP, Function &F) {
  *
  * These are irrelevant to the code, so may be removed completely.
  */
-void FunctionStaticSlicer::removeUndefCalls(ModulePass *MP, Function &F) {
+void FunctionStaticSlicer::removeUndefCalls(ModulePass * /*MP*/, Function &F) {
   for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E;) {
     CallInst *CI = dyn_cast<CallInst>(&*I);
     ++I;
