@@ -30,6 +30,8 @@ namespace llvm {
   ///
   template <class BlockT>
   struct PostDominanceFrontier : public DominanceFrontierBase<BlockT> {
+	  public:
+using DomSetType = typename llvm::DominanceFrontierBase<BlockT>::DomSetType;
     static char ID;
     PostDominanceFrontier()
       : DominanceFrontierBase<BlockT>(true) { }
@@ -41,7 +43,6 @@ namespace llvm {
 #ifdef CONTROL_DEPENDENCE_GRAPH
       calculate(DT, F);
 #else
-      Roots = DT.getRoots();
       if (const DomTreeNode *Root = DT.getRootNode()) {
         calculate(DT, Root);
 #ifdef PDF_DUMP
