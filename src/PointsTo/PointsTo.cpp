@@ -117,7 +117,7 @@ bool CallMaps::compatibleFunTypes(const FunctionType *f1,
   if (!compatibleTypes(f1->getReturnType(), f2->getReturnType()))
     return false;
 
-  for (int i = 0; i < params1 && i < params2; i++)
+  for (unsigned i = 0; i < params1 && i < params2; i++)
     if (!compatibleTypes(f1->getParamType(i), f2->getParamType(i)))
       return false;
 
@@ -238,7 +238,7 @@ static int64_t accumulateConstantOffset(const GetElementPtrInst *gep,
 	    const StructLayout *SL = DL.getStructLayout(STy);
 	    off += SL->getElementOffset(ElementIdx);
 	    continue;
-	} else if (SequentialType *STy = dyn_cast<SequentialType>(*GTI)) {
+	} else if (dyn_cast<SequentialType>(*GTI)) {
 	    off += ElementIdx * DL.getTypeStoreSize(GTI.getIndexedType());
 	    isArray = true;
 	    continue;
@@ -487,7 +487,7 @@ static bool applyRule(PointsToSets &S, ASSIGNMENT<
     return change;
 }
 
-static bool applyRule(PointsToSets &S, DEALLOC<const llvm::Value *>) {
+static bool applyRule(PointsToSets &, DEALLOC<const llvm::Value *>) {
     return false;
 }
 
@@ -531,7 +531,7 @@ static bool applyRules(const RuleCode &RC, PointsToSets &S,
  * account bitcast instructions in the code.
  */
 static PointsToSets &pruneByType(PointsToSets &S) {
-  typedef PointsToSets::mapped_type PTSet;
+  //typedef PointsToSets::mapped_type PTSet;
   for (PointsToSets::iterator s = S.begin(); s != S.end(); ) {
       const llvm::Value *first = s->first.first;
       if (llvm::isa<llvm::Function>(first)) {

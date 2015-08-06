@@ -29,14 +29,14 @@ namespace {
 
     virtual void getAnalysisUsage(AnalysisUsage &AU) const {
       AU.setPreservesAll();
-      AU.addRequired<DataLayout>();
+      AU.addRequired<llvm::DataLayoutPass>();
     }
   };
 }
 
 class Kleerer {
 public:
-  Kleerer(ModulePass &modPass, Module &M, DataLayout &TD,
+  Kleerer(ModulePass &modPass, Module &M, const DataLayout &TD,
           callgraph::Callgraph &CG) : modPass(modPass),
       M(M), TD(TD), CG(CG), C(M.getContext()), intPtrTy(TD.getIntPtrType(C)),
       done(false) {
@@ -51,7 +51,7 @@ public:
 private:
   ModulePass &modPass;
   Module &M;
-  DataLayout &TD;
+  const DataLayout &TD;
   callgraph::Callgraph &CG;
   LLVMContext &C;
   IntegerType *intPtrTy;
@@ -109,7 +109,7 @@ static void check(Value *Func, ArrayRef<Value *> Args) {
   }
 }
 
-static unsigned getTypeSize(DataLayout &TD, Type *type) {
+static unsigned getTypeSize(const DataLayout &TD, Type *type) {
   if (type->isFunctionTy()) /* it is not sized, weird */
     return TD.getPointerSize();
 
@@ -453,7 +453,7 @@ bool Kleerer::run() {
 }
 
 bool KleererPass::runOnModule(Module &M) {
-  DataLayout &TD = getAnalysis<DataLayout>();
+  const DataLayout &TD = this->getAnalysis<llvm::DataLayoutPass>().getDataLayout();
   ptr::PointsToSets PS;
   {
     ptr::ProgramStructure P(M);

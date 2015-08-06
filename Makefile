@@ -26,7 +26,7 @@ Modifies.o	: ./src/Modifies/Modifies.cpp
 	$(CC) $(CXXFLAGS) ./src/Modifies/Modifies.cpp
 
 PointsTo.o	: ./src/PointsTo/PointsTo.cpp
-	$(CC) $(CXXFLAGS) ./PointsTo/PointsTo.cpp
+	$(CC) $(CXXFLAGS) ./src//PointsTo/PointsTo.cpp
 
 FunctionStaticSlicer.o	: ./src/Slicing/FunctionStaticSlicer.cpp
 	$(CC) $(CXXFLAGS) ./src/Slicing/FunctionStaticSlicer.cpp

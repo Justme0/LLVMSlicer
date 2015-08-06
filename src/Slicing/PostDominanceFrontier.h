@@ -28,14 +28,16 @@ namespace llvm {
   /// PostDominanceFrontier Class - Concrete subclass of DominanceFrontier that is
   /// used to compute the a post-dominance frontier.
   ///
-  struct PostDominanceFrontier : public DominanceFrontierBase {
+  template <class BlockT>
+  struct PostDominanceFrontier : public DominanceFrontierBase<BlockT> {
     static char ID;
     PostDominanceFrontier()
-      : DominanceFrontierBase(ID, true) { }
+      : DominanceFrontierBase<BlockT>(true) { }
 
-    virtual bool runOnFunction(Function &F) {
-      Frontiers.clear();
-      PostDominatorTree &DT = getAnalysis<PostDominatorTree>();
+    bool runOnFunction(Function &F) override {
+      this->Frontiers.clear();
+      //PostDominatorTree &DT = this->getAnalysis<PostDominatorTree>();
+      PostDominatorTree DT;
 #ifdef CONTROL_DEPENDENCE_GRAPH
       calculate(DT, F);
 #else
@@ -67,7 +69,7 @@ namespace llvm {
     const DomTreeNode *findNearestCommonDominator(const PostDominatorTree &DT,
 		    DomTreeNode *A, DomTreeNode *B);
 #else
-    const DomSetType &calculate(const PostDominatorTree &DT,
+    const typename llvm::DominanceFrontierBase<BlockT>::DomSetType &calculate(const PostDominatorTree &DT,
                                 const DomTreeNode *Node);
 #endif
   };
