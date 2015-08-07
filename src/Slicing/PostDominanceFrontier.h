@@ -31,47 +31,47 @@ namespace llvm {
   template <class BlockT>
   struct PostDominanceFrontier : public DominanceFrontierBase<BlockT> {
 	  public:
-using DomSetType = typename llvm::DominanceFrontierBase<BlockT>::DomSetType;
-    static char ID;
-    PostDominanceFrontier()
-      : DominanceFrontierBase<BlockT>(true) { }
+		  using DomSetType = typename llvm::DominanceFrontierBase<BlockT>::DomSetType;
+		  static char ID;
+		  PostDominanceFrontier()
+			  : DominanceFrontierBase<BlockT>(true) { }
 
-    bool runOnFunction(Function &F) override {
-      this->Frontiers.clear();
-      //PostDominatorTree &DT = this->getAnalysis<PostDominatorTree>();
-      PostDominatorTree DT;
+		  bool runOnFunction(Function &F) override {
+			  this->Frontiers.clear();
+			  PostDominatorTree &DT = this->getAnalysis<PostDominatorTree>();
 #ifdef CONTROL_DEPENDENCE_GRAPH
-      calculate(DT, F);
+			  calculate(DT, F);
 #else
-      if (const DomTreeNode *Root = DT.getRootNode()) {
-        calculate(DT, Root);
+			  (void)F;
+			  if (const DomTreeNode *Root = DT.getRootNode()) {
+				  calculate(DT, Root);
 #ifdef PDF_DUMP
-	errs() << "=== DUMP:\n";
-	dump();
-	errs() << "=== EOD\n";
+				  errs() << "=== DUMP:\n";
+				  dump();
+				  errs() << "=== EOD\n";
 #endif
-      }
+			  }
 #endif
-      return false;
-    }
+			  return false;
+		  }
 
-    virtual void getAnalysisUsage(AnalysisUsage &AU) const {
-      AU.setPreservesAll();
-      AU.addRequired<PostDominatorTree>();
-    }
+		  virtual void getAnalysisUsage(AnalysisUsage &AU) const {
+			  AU.setPreservesAll();
+			  AU.addRequired<PostDominatorTree>();
+		  }
 
-  private:
+	  private:
 #ifdef CONTROL_DEPENDENCE_GRAPH
-    typedef std::pair<DomTreeNode *, DomTreeNode *> Ssubtype;
-    typedef std::set<Ssubtype> Stype;
+		  typedef std::pair<DomTreeNode *, DomTreeNode *> Ssubtype;
+		  typedef std::set<Ssubtype> Stype;
 
-    void calculate(const PostDominatorTree &DT, Function &F);
-    void constructS(const PostDominatorTree &DT, Function &F, Stype &S);
-    const DomTreeNode *findNearestCommonDominator(const PostDominatorTree &DT,
-		    DomTreeNode *A, DomTreeNode *B);
+		  void calculate(const PostDominatorTree &DT, Function &F);
+		  void constructS(const PostDominatorTree &DT, Function &F, Stype &S);
+		  const DomTreeNode *findNearestCommonDominator(const PostDominatorTree &DT,
+				  DomTreeNode *A, DomTreeNode *B);
 #else
-    const typename llvm::DominanceFrontierBase<BlockT>::DomSetType &calculate(const PostDominatorTree &DT,
-                                const DomTreeNode *Node);
+		  DomSetType &calculate(const PostDominatorTree &DT,
+				  const DomTreeNode *Node);
 #endif
   };
 }
