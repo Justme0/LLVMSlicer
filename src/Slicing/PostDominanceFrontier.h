@@ -18,9 +18,9 @@ namespace llvm {
 
     CreateHammockCFG() : FunctionPass(ID) { }
 
-    virtual bool runOnFunction(Function &F);
+    bool runOnFunction(Function &F) override;
 
-    virtual void getAnalysisUsage(AnalysisUsage &AU) const {
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
       AU.addRequired<LoopInfo>();
     }
   };
@@ -37,6 +37,7 @@ namespace llvm {
 			  : DominanceFrontierBase<BlockT>(true) { }
 
 		  bool runOnFunction(Function &F) override {
+			  // this->Frontirs's type is tstd::map<BlockT *, DomSetType>
 			  this->Frontiers.clear();
 			  PostDominatorTree &DT = this->getAnalysis<PostDominatorTree>();
 #ifdef CONTROL_DEPENDENCE_GRAPH
@@ -55,7 +56,7 @@ namespace llvm {
 			  return false;
 		  }
 
-		  virtual void getAnalysisUsage(AnalysisUsage &AU) const {
+		  void getAnalysisUsage(AnalysisUsage &AU) const override {
 			  AU.setPreservesAll();
 			  AU.addRequired<PostDominatorTree>();
 		  }

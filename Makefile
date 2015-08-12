@@ -1,9 +1,8 @@
 target		= LLVMSlicer
 
-OBJS		= Callgraph.o Kleerer.o LLVM.o ModStats.o Modifies.o PointsTo.o FunctionStaticSlicer.o PostDominanceFrontier.o Prepare.o StaticSlicer.o dump-points-to.o field-sensitive-test.o
+OBJS		= Callgraph.o Kleerer.o LLVM.o ModStats.o Modifies.o PointsTo.o Prepare.o dump-points-to.o field-sensitive-test.o PostDominanceFrontier.o FunctionStaticSlicer.o StaticSlicer.o
 CC		= g++
-CXXFLAGS	= -Wall -Wextra -std=c++11 -c
-#LDFLAGS		= -L/home/justme0/Download/llvm-3.6.1.src
+CXXFLAGS	= -Werror -Wall -Wextra -std=c++11 -c
 
 all		: $(target)
 
@@ -42,3 +41,9 @@ StaticSlicer.o	: ./src/Slicing/StaticSlicer.cpp
 
 dump-points-to.o	: ./test/dump-points-to.cpp
 	$(CC) $(CXXFLAGS) ./test/dump-points-to.cpp
+
+field-sensitive-test.o	: ./test/field-sensitive-test.cpp
+	$(CC) $(CXXFLAGS) ./test/field-sensitive-test.cpp
+
+clean		:
+	rm -f $(OBJS) $(target)
