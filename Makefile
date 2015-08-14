@@ -1,13 +1,14 @@
 target		= LLVMSlicer
 
-OBJS		= Callgraph.o Kleerer.o LLVM.o ModStats.o Modifies.o PointsTo.o Prepare.o dump-points-to.o field-sensitive-test.o PostDominanceFrontier.o FunctionStaticSlicer.o StaticSlicer.o
+OBJS		= Callgraph.o Kleerer.o LLVM.o ModStats.o Modifies.o PointsTo.o Prepare.o PostDominanceFrontier.o FunctionStaticSlicer.o StaticSlicer.o dump-points-to.o
+
 CC		= g++
-CXXFLAGS	= -Werror -Wall -Wextra -std=c++11 -c
+CXXFLAGS	= -g -Werror -Wall -Wextra -std=c++11 `llvm-config --cxxflags` -c
 
 all		: $(target)
 
 $(target)	: $(OBJS)
-	$(CC) -o $@ $(OBJS)
+	$(CC) -g -o $@ $(OBJS) `llvm-config --cxxflags --libs --ldflags all` -lLLVMSupport -pthread -ldl
 
 Callgraph.o	: ./src/Callgraph/Callgraph.cpp
 	$(CC) $(CXXFLAGS) ./src/Callgraph/Callgraph.cpp

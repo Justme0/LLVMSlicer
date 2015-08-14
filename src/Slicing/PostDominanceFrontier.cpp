@@ -60,6 +60,10 @@ bool CreateHammockCFG::runOnFunction(Function &F) {
 static RegisterPass<PostDominanceFrontier> X("postdom-frontier", "Computes postdom frontiers");
 char PostDominanceFrontier::ID = 0;
 
+PostDominanceFrontier::PostDominanceFrontier() : FunctionPass(ID), Base() {
+	initializeDominanceFrontierPass(*PassRegistry::getPassRegistry());
+}
+
 #ifdef CONTROL_DEPENDENCE_GRAPH
 void PostDominanceFrontier::constructS(const PostDominatorTree &DT,
 		Function &F, Stype &S) {
@@ -120,16 +124,16 @@ PostDominanceFrontier::calculate(const PostDominatorTree &DT, Function &F) {
 
 #else /* CONTROL_DEPENDENCE_GRAPH */
 
-const DominanceFrontier::DomSetType &
+const PostDominanceFrontier::DomSetType &
 PostDominanceFrontier::calculate(const PostDominatorTree &DT,
                                  const DomTreeNode *Node) {
   // Loop over CFG successors to calculate DFlocal[Node]
-  BasicBlock *BB = Node->getBlock();
-  DomSetType &S = Frontiers[BB];       // The new set to fill in...
-  if (getRoots().empty()) return S;
+  BasicBlock *pBasicBlock = Node->getBlock();
+  DomSetType &S = this->Base.find(pBasicBlock)->second;       // The new set to fill in...
+  if (this->Base.getRoots().empty()) return S;
 
-  if (BB)
-    for (pred_iterator SI = pred_begin(BB), SE = pred_end(BB);
+  if (pBasicBlock)
+    for (pred_iterator SI = pred_begin(pBasicBlock), SE = pred_end(pBasicBlock);
          SI != SE; ++SI) {
       BasicBlock *P = *SI;
       // Does Node immediately dominate this predecessor?

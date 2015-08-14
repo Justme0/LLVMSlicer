@@ -1,9 +1,3 @@
-//
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
-
 #ifndef POST_DOMINANCE_FRONTIER
 #define POST_DOMINANCE_FRONTIER
 
@@ -13,68 +7,97 @@
 
 namespace llvm {
 
-  struct CreateHammockCFG : public FunctionPass {
-    static char ID;
+struct CreateHammockCFG : public FunctionPass {
+	static char ID;
 
-    CreateHammockCFG() : FunctionPass(ID) { }
+	CreateHammockCFG() : FunctionPass(ID) { }
 
-    bool runOnFunction(Function &F) override;
+	bool runOnFunction(Function &F) override;
 
-    void getAnalysisUsage(AnalysisUsage &AU) const override {
-      AU.addRequired<LoopInfo>();
-    }
-  };
+	void getAnalysisUsage(AnalysisUsage &AU) const override {
+		AU.addRequired<LoopInfo>();
+	}
+};
 
-  /// PostDominanceFrontier Class - Concrete subclass of DominanceFrontier that is
-  /// used to compute the a post-dominance frontier.
-  ///
-  template <class BlockT>
-  struct PostDominanceFrontier : public DominanceFrontierBase<BlockT> {
-	  public:
-		  using DomSetType = typename llvm::DominanceFrontierBase<BlockT>::DomSetType;
-		  static char ID;
-		  PostDominanceFrontier()
-			  : DominanceFrontierBase<BlockT>(true) { }
+class PostDominanceFrontier : public FunctionPass {
+	ForwardDominanceFrontierBase<BasicBlock> Base;
 
-		  bool runOnFunction(Function &F) override {
-			  // this->Frontirs's type is tstd::map<BlockT *, DomSetType>
-			  this->Frontiers.clear();
-			  PostDominatorTree &DT = this->getAnalysis<PostDominatorTree>();
+	public:
+	using DomSetType = DominanceFrontierBase<BasicBlock>::DomSetType;
+	using iterator = DominanceFrontierBase<BasicBlock>::iterator;
+	using const_iterator = DominanceFrontierBase<BasicBlock>::const_iterator;
+
+	static char ID;
+
+	PostDominanceFrontier();
+
+	iterator begin() {
+		return Base.begin();
+	}
+
+	const_iterator begin() const {
+		return Base.begin();
+	}
+
+	iterator end() {
+		return Base.end();
+	}
+
+	const_iterator end() const {
+		return Base.end();
+	}
+
+	iterator find(BasicBlock *pBasicBlock) {
+		return Base.find(pBasicBlock);
+	}
+
+	const_iterator find(BasicBlock *pBasicBlock) const {
+		return Base.find(pBasicBlock);
+	}
+
+	bool runOnFunction(Function &) override {
+		releaseMemory();	// call DominanceFrontierBase.Frontiers.clear()
+		PostDominatorTree &postDominatorTree = this->getAnalysis<PostDominatorTree>();
 #ifdef CONTROL_DEPENDENCE_GRAPH
-			  calculate(DT, F);
+		calculate(DT, F);
 #else
-			  (void)F;
-			  if (const DomTreeNode *Root = DT.getRootNode()) {
-				  calculate(DT, Root);
-#ifdef PDF_DUMP
-				  errs() << "=== DUMP:\n";
-				  dump();
-				  errs() << "=== EOD\n";
+		// in ForwardDominanceFrontierBase<BlockT>
+		// typedef DominatorTreeBase<BlockT> DomTreeT;
+		DominatorTreeBase<BasicBlock> &dominatorTreeBase = *postDominatorTree.DT;
+		Base.analyze(dominatorTreeBase);
+		// TODO
+		//		if (const DomTreeNode *Root = DT.getRootNode()) {
+		//			calculate(DT, Root);
+		//#ifdef PDF_DUMP
+		//			errs() << "=== DUMP:\n";
+		//			dump();
+		//			errs() << "=== EOD\n";
+		//#endif
+		//		}
 #endif
-			  }
-#endif
-			  return false;
-		  }
+		return false;
+	}
 
-		  void getAnalysisUsage(AnalysisUsage &AU) const override {
-			  AU.setPreservesAll();
-			  AU.addRequired<PostDominatorTree>();
-		  }
+	void getAnalysisUsage(AnalysisUsage &AU) const override {
+		AU.setPreservesAll();
+		AU.addRequired<PostDominatorTree>();
+	}
 
-	  private:
+	private:
 #ifdef CONTROL_DEPENDENCE_GRAPH
-		  typedef std::pair<DomTreeNode *, DomTreeNode *> Ssubtype;
-		  typedef std::set<Ssubtype> Stype;
+	typedef std::pair<DomTreeNode *, DomTreeNode *> Ssubtype;
+	typedef std::set<Ssubtype> Stype;
 
-		  void calculate(const PostDominatorTree &DT, Function &F);
-		  void constructS(const PostDominatorTree &DT, Function &F, Stype &S);
-		  const DomTreeNode *findNearestCommonDominator(const PostDominatorTree &DT,
-				  DomTreeNode *A, DomTreeNode *B);
+	void calculate(const PostDominatorTree &DT, Function &F);
+	void constructS(const PostDominatorTree &DT, Function &F, Stype &S);
+	const DomTreeNode *findNearestCommonDominator(const PostDominatorTree &DT,
+			DomTreeNode *A, DomTreeNode *B);
 #else
-		  DomSetType &calculate(const PostDominatorTree &DT,
-				  const DomTreeNode *Node);
+	const DomSetType &calculate(const PostDominatorTree &DT,
+			const DomTreeNode *Node);
 #endif
-  };
+};
+
 }
 
 #endif
