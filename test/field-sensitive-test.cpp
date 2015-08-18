@@ -1,4 +1,5 @@
-#include <stdlib.h>
+#include <cstdlib>
+#include <iostream>
 #include <utility>
 
 #include <llvm/IR/LLVMContext.h>
@@ -12,6 +13,8 @@
 #define DEBUG
 
 using namespace llvm;
+using std::cout;
+using std::endl;
 
 typedef ptr::PointsToSets::Pointer Ptr;
 typedef ptr::PointsToSets::Pointee Ptee;
@@ -22,10 +25,8 @@ typedef SmallVector<ToCheckEl, 20> ToCheck;
 static void pointsTo(Module &M, const ToCheck &toCheck)
 {
 	ptr::PointsToSets PS;
-	{
-		ptr::ProgramStructure P(M);
-		computePointsToSets(P, PS);
-	}
+	ptr::ProgramStructure progStruct(M);
+	computePointsToSets(progStruct, PS);
 #ifdef DEBUG
 	for (ptr::PointsToSets::const_iterator I = PS.begin(), E = PS.end();
 			I != E; ++I) {
@@ -83,8 +84,8 @@ static Value *call_malloc(ToCheck &toCheck, BasicBlock *entry,
 		Function *xmalloc, uint64_t size) {
 	LLVMContext &C = xmalloc->getContext();
 	Value *ret = CallInst::Create(xmalloc,
-		ArrayRef<Value *>(ConstantInt::get(Type::getInt64Ty(C), size)),
-		"", entry);
+			ArrayRef<Value *>(ConstantInt::get(Type::getInt64Ty(C), size)),
+			"", entry);
 
 	addCheck(toCheck, ret, -1, ret, 0);
 
@@ -161,7 +162,7 @@ static std::unique_ptr<Module> build(LLVMContext &C, ToCheck &toCheck)
 #ifdef DEBUG
 	errs() << "====== DUMP\n";
 	M->dump();
-	errs() << "====== EOD\n";
+	errs() << "====== DUMP END\n";
 #endif
 	return std::unique_ptr<Module>(M);
 }
@@ -170,8 +171,8 @@ int main()
 {
 	LLVMContext context;
 	ToCheck toCheck;
-
-	pointsTo(*build(context, toCheck), toCheck);
+	std::unique_ptr<Module> pmodule = build(context, toCheck);
+	pointsTo(*pmodule, toCheck);
 
 	return 0;
 }

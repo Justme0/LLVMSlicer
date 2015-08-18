@@ -1,4 +1,5 @@
 #include <memory>
+#include <iostream>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
@@ -28,10 +29,8 @@ static void pointsTo(const Value &val, const ptr::PointsToSets &PS)
 static void pointsTo(Module &M)
 {
 	ptr::PointsToSets PS;
-	{
-		ptr::ProgramStructure P(M);
-		computePointsToSets(P, PS);
-	}
+	ptr::ProgramStructure progStruct(M);
+	computePointsToSets(progStruct, PS);
 
 	for (Module::const_iterator I = M.begin(), E = M.end(); I != E; ++I) {
 		const Function &F = *I;
@@ -71,17 +70,21 @@ static void pointsTo(Module &M)
 	}
 }
 
-int main(int, char **argv)
+int main(int argc, char **argv)
 {
+	if (argc < 2) {
+		std::cout << "Too few arguments." << std::endl;
+		return 1;
+	}
 	LLVMContext context;
-	SMDiagnostic SMD;
-	std::unique_ptr<llvm::Module> M = llvm::parseIRFile(argv[1], SMD, context);
-	if (nullptr == M) {
+	SMDiagnostic SMD;	// source message diagnostic
+	std::unique_ptr<llvm::Module> pmodule = llvm::parseIRFile(argv[1], SMD, context);
+	if (nullptr == pmodule) {
 		SMD.print(argv[0], errs());
 		return 1;
 	}
 
-	pointsTo(*M);
+	pointsTo(*pmodule);
 
 	return 0;
 }
