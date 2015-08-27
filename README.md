@@ -16,6 +16,11 @@ Of course, you have to make sure that the library is in a path where dynamic
 libraries are looked for (or add the path where the library is to
 LD_LIBRARY_PATH).
 
+use script:
+$ cd test
+$ ./test.rb example.c
+Output IR files are example.ll and example_sliced.ll.
+
 ## Bug reports
 Use github for reports and pull requests, please.
 

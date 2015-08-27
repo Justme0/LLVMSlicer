@@ -523,6 +523,7 @@ static bool applyRules(const RuleCode &RC, PointsToSets &S,
 	return applyRule(S, ruleDeallocSite(RC.getValue()).getSort());
     default:
 	assert(0);
+	return false;
     }
 }
 

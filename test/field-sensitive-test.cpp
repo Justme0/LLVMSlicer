@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <iostream>
 #include <utility>
 
 #include <llvm/IR/LLVMContext.h>
@@ -13,8 +12,6 @@
 #define DEBUG
 
 using namespace llvm;
-using std::cout;
-using std::endl;
 
 typedef ptr::PointsToSets::Pointer Ptr;
 typedef ptr::PointsToSets::Pointee Ptee;

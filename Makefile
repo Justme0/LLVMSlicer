@@ -1,15 +1,16 @@
-target		= llvm-slicer
+target		= llvm-slicer.so
 
-# OBJS		= Callgraph.o Kleerer.o LLVM.o ModStats.o Modifies.o PointsTo.o Prepare.o PostDominanceFrontier.o FunctionStaticSlicer.o StaticSlicer.o field-sensitive-test.o
-OBJS		= Callgraph.o Kleerer.o LLVM.o ModStats.o Modifies.o PointsTo.o Prepare.o PostDominanceFrontier.o FunctionStaticSlicer.o StaticSlicer.o dump-points-to.o
+OBJS		= Callgraph.o Kleerer.o LLVM.o ModStats.o Modifies.o PointsTo.o Prepare.o PostDominanceFrontier.o FunctionStaticSlicer.o StaticSlicer.o
 
 CC		= g++
-CXXFLAGS	= -g -Werror -Wall -Wextra -std=c++11 `llvm-config --cxxflags` -c
+CXXFLAGS	= -DDEBUG_SLICING -DDEBUG_SLICE -fPIC -g -Wall -Wextra -std=c++11 `llvm-config --cxxflags` -c
+
+.PHONY		: all clean
 
 all		: $(target)
 
 $(target)	: $(OBJS)
-	$(CC) -g -o $@ $(OBJS) `llvm-config --cxxflags --libs --ldflags all` -lLLVMSupport -pthread -ldl
+	$(CC) $(OBJS) -shared -g -o $@
 
 Callgraph.o	: ./src/Callgraph/Callgraph.cpp
 	$(CC) $(CXXFLAGS) ./src/Callgraph/Callgraph.cpp
@@ -40,12 +41,6 @@ Prepare.o	: ./src/Slicing/Prepare.cpp
 
 StaticSlicer.o	: ./src/Slicing/StaticSlicer.cpp
 	$(CC) $(CXXFLAGS) ./src/Slicing/StaticSlicer.cpp
-
-dump-points-to.o	: ./test/dump-points-to.cpp
-	$(CC) $(CXXFLAGS) ./test/dump-points-to.cpp
-
-field-sensitive-test.o	: ./test/field-sensitive-test.cpp
-	$(CC) $(CXXFLAGS) ./test/field-sensitive-test.cpp
 
 clean		:
 	rm -f $(target) *.o

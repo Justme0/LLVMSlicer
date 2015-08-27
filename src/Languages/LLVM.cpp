@@ -139,6 +139,7 @@ namespace llvm {
             return dyn_cast<FunctionType>(ptrType->getElementType());
 
 	assert(0 && "Invalid callie type");
+	return nullptr;
     }
 
     bool isMemoryAllocation(llvm::Value const* const V)
