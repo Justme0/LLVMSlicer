@@ -27,27 +27,27 @@
 using namespace llvm;
 
 namespace {
-	class Prepare : public ModulePass {
-		public:
-			static char ID;
+class Prepare : public ModulePass {
+	public:
+		static char ID;
 
-			Prepare() : ModulePass(ID) {}
+		Prepare() : ModulePass(ID) {}
 
-			bool runOnModule(Module &M) override;
+		bool runOnModule(Module &M) override;
 
-		private:
-			static void replaceInsLoad(llvm::Function &F, llvm::CallInst *CI);
-			static void replaceInsStore(llvm::Function &F, llvm::CallInst *CI);
-			static bool handleAsm(Function &F, CallInst *CI);
-			static void makeNop(Function *F);
-			static void deleteAsmBodies(Module &M);
-			static bool runOnFunction(Function &F);
+	private:
+		static void replaceInsLoad(llvm::Function &F, llvm::CallInst *CI);
+		static void replaceInsStore(llvm::Function &F, llvm::CallInst *CI);
+		static bool handleAsm(Function &F, CallInst *CI);
+		static void makeNop(Function *F);
+		static void deleteAsmBodies(Module &M);
+		static bool runOnFunction(Function &F);
 
-			void findInitFuns(Module &M, const ptr::PointsToSets &PS);
-			bool addInitFun(const callgraph::Callgraph &CG,
-					SmallVector<Constant *, 10> &initFns, Type *ETy, Function &F,
-					bool starting = false);
-	};
+		void findInitFuns(Module &M, const ptr::PointsToSets &PS);
+		bool addInitFun(const callgraph::Callgraph &CG,
+				SmallVector<Constant *, 10> &initFns, Type *ETy, Function &F,
+				bool starting = false);
+};
 }
 
 static RegisterPass<Prepare> X("prepare", "Prepares the code for slicing");

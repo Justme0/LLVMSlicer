@@ -40,6 +40,6 @@ puts "slicing #{ir} to #{sliced_ir}...".brown
 abort unless $?.success?
 
 puts "\nfinished".green
-puts "source file		: #{src}"
-puts "IR before slicing	: #{ir}"
-puts "IR after slicing	: #{sliced_ir}"
+puts "source file       : #{src}"
+puts "IR before slicing : #{ir}"
+puts "IR after slicing  : #{sliced_ir}"
