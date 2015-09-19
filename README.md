@@ -9,7 +9,7 @@ place where an assert is in the code).
 ## HOWTO
 $ make
 $ cd test
-$ ./test.rb example.c
+$ ./test.rb --file example.c
 IR files are example.ll and example_sliced.ll.
 
 Basically, what one needs to do to slice src.o LLVM code into dst.o is:

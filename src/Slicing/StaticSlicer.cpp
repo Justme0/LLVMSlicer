@@ -82,44 +82,44 @@ static void getRelevantVarsAtExit(const CallInst *C, const ReturnInst *R,
 namespace llvm { namespace slicing {
 
 class StaticSlicer {
-	public:
-		typedef std::map<llvm::Function const*, FunctionStaticSlicer *> Slicers;
-		typedef std::multimap<llvm::Function const*,llvm::CallInst const*>
-			FuncsToCalls;
-		typedef std::multimap<llvm::CallInst const*,llvm::Function const*>
-			CallsToFuncs;
+public:
+	typedef std::map<llvm::Function const*, FunctionStaticSlicer *> Slicers;
+	typedef std::multimap<llvm::Function const*,llvm::CallInst const*>
+	FuncsToCalls;
+	typedef std::multimap<llvm::CallInst const*,llvm::Function const*>
+	CallsToFuncs;
 
-		StaticSlicer(ModulePass *MP, Module &M,
-				const ptr::PointsToSets &PS,
-				const callgraph::Callgraph &CG,
-				const mods::Modifies &MOD);
+	StaticSlicer(ModulePass *MP, Module &M,
+			const ptr::PointsToSets &PS,
+			const callgraph::Callgraph &CG,
+			const mods::Modifies &MOD);
 
-		~StaticSlicer();
+	~StaticSlicer();
 
-		void computeSlice();
-		bool sliceModule();
+	void computeSlice();
+	bool sliceModule();
 
-	private:
-		typedef llvm::SmallVector<const llvm::Function *, 20> InitFuns;
+private:
+	typedef llvm::SmallVector<const llvm::Function *, 20> InitFuns;
 
-		void buildDicts(const ptr::PointsToSets &PS, const CallInst *c);
-		void buildDicts(const ptr::PointsToSets &PS);
+	void buildDicts(const ptr::PointsToSets &PS, const CallInst *c);
+	void buildDicts(const ptr::PointsToSets &PS);
 
-		template<typename OutIterator>
-			void emitToCalls(llvm::Function const* const f, OutIterator out);
+	template<typename OutIterator>
+	void emitToCalls(llvm::Function const* const f, OutIterator out);
 
-		template<typename OutIterator>
-			void emitToExits(llvm::Function const* const f, OutIterator out);
+	template<typename OutIterator>
+	void emitToExits(llvm::Function const* const f, OutIterator out);
 
-		void runFSS(Function &F, const ptr::PointsToSets &PS,
-				const callgraph::Callgraph &CG, const mods::Modifies &MOD);
+	void runFSS(Function &F, const ptr::PointsToSets &PS,
+			const callgraph::Callgraph &CG, const mods::Modifies &MOD);
 
-		ModulePass *MP;
-		Module &module;
-		Slicers slicers;
-		InitFuns initFuns;
-		FuncsToCalls funcsToCalls;
-		CallsToFuncs callsToFuncs;
+	ModulePass *MP;
+	Module &module;
+	Slicers slicers;
+	InitFuns initFuns;
+	FuncsToCalls funcsToCalls;
+	CallsToFuncs callsToFuncs;
 };
 
 template<typename OutIterator>
@@ -156,9 +156,9 @@ void StaticSlicer::emitToExits(const Function *f, OutIterator out) {
 
 	for (CallsVec::const_iterator c = C.begin(); c != C.end(); ++c) {
 		const ValSet::const_iterator relBgn =
-			slicers[f]->relevant_begin(getSuccInBlock(*c));
+		slicers[f]->relevant_begin(getSuccInBlock(*c));
 		const ValSet::const_iterator relEnd =
-			slicers[f]->relevant_end(getSuccInBlock(*c));
+		slicers[f]->relevant_end(getSuccInBlock(*c));
 
 		CallsToFuncs::const_iterator g, e;
 		std::tie(g, e) = callsToFuncs.equal_range(*c);
@@ -205,7 +205,7 @@ void StaticSlicer::buildDicts(const ptr::PointsToSets &PS)
 				if (const CallInst *c = dyn_cast<CallInst>(&*I)) {
 					if (isInlineAssembly(c)) {
 						errs() << "ERROR: Inline assembler detected in " <<
-							f->getName() << ", skipping\n";
+						f->getName() << ", skipping\n";
 						continue;
 					}
 
@@ -213,17 +213,24 @@ void StaticSlicer::buildDicts(const ptr::PointsToSets &PS)
 				}
 }
 
-StaticSlicer::StaticSlicer(ModulePass *MP, Module &M,
+StaticSlicer::StaticSlicer(
+		ModulePass *MP,
+		Module &M,
 		const ptr::PointsToSets &PS,
 		const callgraph::Callgraph &CG,
-		const mods::Modifies &MOD) : MP(MP), module(M),
-	slicers(), initFuns(), funcsToCalls(),
-	callsToFuncs() {
-		for (Module::iterator f = M.begin(); f != M.end(); ++f)
-			if (!f->isDeclaration() && !memoryManStuff(&*f))
-				runFSS(*f, PS, CG, MOD);
-		buildDicts(PS);
-	}
+		const mods::Modifies &MOD) :
+	MP(MP),
+	module(M),
+	slicers(),
+	initFuns(),
+	funcsToCalls(),
+	callsToFuncs()
+{
+	for (Module::iterator f = M.begin(); f != M.end(); ++f)
+		if (!f->isDeclaration() && !memoryManStuff(&*f))
+			runFSS(*f, PS, CG, MOD);
+	buildDicts(PS);
+}
 
 StaticSlicer::~StaticSlicer() {
 	for (Slicers::const_iterator I = slicers.begin(), E = slicers.end();
@@ -281,17 +288,17 @@ bool StaticSlicer::sliceModule() {
 
 namespace {
 class Slicer : public ModulePass {
-	public:
-		static char ID;
+public:
+	static char ID;
 
-		Slicer() : ModulePass(ID) {}
+	Slicer() : ModulePass(ID) {}
 
-		bool runOnModule(Module &M) override;
+	bool runOnModule(Module &M) override;
 
-		void getAnalysisUsage(AnalysisUsage &AU) const override {
-			AU.addRequired<PostDominatorTree>();
-			AU.addRequired<PostDominanceFrontier>();
-		}
+	void getAnalysisUsage(AnalysisUsage &AU) const override {
+		AU.addRequired<PostDominatorTree>();
+		AU.addRequired<PostDominanceFrontier>();
+	}
 };
 }
 

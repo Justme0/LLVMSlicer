@@ -9,4 +9,8 @@ cmake_install.cmake
 
 /CMakeCache.txt
 /src/LLVMSlicer.so
+*.so
+*.a
 LLVMSlicer
+*.ll
+*.bc

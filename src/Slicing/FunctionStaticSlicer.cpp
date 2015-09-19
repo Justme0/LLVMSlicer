@@ -105,10 +105,9 @@ InsInfo::InsInfo(const Instruction *i, const ptr::PointsToSets &PS,
 		const Value *op = elimConstExpr(LI->getPointerOperand());
 		if (isa<ConstantPointerNull>(op)) {
 			errs() << "ERROR in analysed code -- reading from address 0 at " <<
-				i->getParent()->getParent()->getName() << ":\n";
+			i->getParent()->getParent()->getName() << ":\n";
 			i->print(errs());
-		} else if (isa<ConstantInt>(op)) {
-		} else {
+		} else if (!isa<ConstantInt>(op)) {
 			addREF(Pointee(op, -1));
 			if (hasExtraReference(op)) {
 				addREF(Pointee(op, 0));
@@ -122,10 +121,9 @@ InsInfo::InsInfo(const Instruction *i, const ptr::PointsToSets &PS,
 		const Value *l = elimConstExpr(SI->getPointerOperand());
 		if (isa<ConstantPointerNull>(l)) {
 			errs() << "ERROR in analysed code -- writing to address 0 at " <<
-				i->getParent()->getParent()->getName() << ":\n";
+			i->getParent()->getParent()->getName() << ":\n";
 			i->print(errs());
-		} else if (isa<ConstantInt>(l)) {
-		} else {
+		} else if (!isa<ConstantInt>(l)) {
 			if (hasExtraReference(l)) {
 				addDEF(Pointee(l, 0));
 			} else {
@@ -157,7 +155,7 @@ InsInfo::InsInfo(const Instruction *i, const ptr::PointsToSets &PS,
 
 		if (isInlineAssembly(C)) {
 			errs() << "ERROR: Inline assembler detected in " <<
-				i->getParent()->getParent()->getName() << ", ignoring\n";
+			i->getParent()->getParent()->getName() << ", ignoring\n";
 		} else if (isMemoryAllocation(cv)) {
 			if (!isConstantValue(C->getArgOperand(0)))
 				addREF(Pointee(C->getArgOperand(0), -1));
@@ -269,21 +267,21 @@ InsInfo::InsInfo(const Instruction *i, const ptr::PointsToSets &PS,
 
 namespace {
 class FunctionSlicer : public ModulePass {
-	public:
-		static char ID;
+public:
+	static char ID;
 
-		FunctionSlicer() : ModulePass(ID) {}
+	FunctionSlicer() : ModulePass(ID) {}
 
-		bool runOnModule(Module &M) override;
+	bool runOnModule(Module &M) override;
 
-		void getAnalysisUsage(AnalysisUsage &AU) const override {
-			AU.addRequired<PostDominatorTree>();
-			AU.addRequired<PostDominanceFrontier>();
-		}
+	void getAnalysisUsage(AnalysisUsage &AU) const override {
+		AU.addRequired<PostDominatorTree>();
+		AU.addRequired<PostDominanceFrontier>();
+	}
 
-	private:
-		bool runOnFunction(Function &F, const ptr::PointsToSets &PS,
-				const mods::Modifies &MOD);
+private:
+	bool runOnFunction(Function &F, const ptr::PointsToSets &PS,
+			const mods::Modifies &MOD);
 };
 }
 
@@ -711,10 +709,10 @@ static bool handleAssert(Function &F, FunctionStaticSlicer &ss,
 		if (fileArg && fileArg->getOpcode() == Instruction::GetElementPtr &&
 				lineArg) {
 			const GlobalVariable *strVar =
-				dyn_cast<GlobalVariable>(fileArg->getOperand(0));
+			dyn_cast<GlobalVariable>(fileArg->getOperand(0));
 			assert(strVar && strVar->hasInitializer());
 			const ConstantDataArray *str =
-				dyn_cast<ConstantDataArray>(strVar->getInitializer());
+			dyn_cast<ConstantDataArray>(strVar->getInitializer());
 			assert(str && str->isCString());
 			/* trim the NUL terminator */
 			StringRef fileArgStr = str->getAsString().drop_back(1);
@@ -783,7 +781,7 @@ bool llvm::slicing::findInitialCriterion(Function &F,
 						continue;
 #ifdef DEBUG_INITCRIT
 					errs() << "adding " << GV.getName() << " into " << F.getName() <<
-						" to \n";
+					" to \n";
 					RI->dump();
 #endif
 					ss.addInitialCriterion(RI, ptr::PointsToSets::Pointee(&GV, -1),
