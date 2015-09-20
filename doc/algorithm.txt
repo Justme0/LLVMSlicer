@@ -1,0 +1,24 @@
+C = <i,V>	// criterion, at statement i and observe variable set V
+
+N:
+ND(n) = {m | m in (n, n's nearest inverse dominator)}	// exclude ends
+
+N:
+CS(N) = N union {n | nil != (ND(n) intersect N)}	// all statements influencing N, including directly and indirectly
+
+N:
+// branch statements included by CS(S[0,C]). Me: B[0,C] = CS(S[0,C]) - S[0,C] ?
+B[0,C] = CS(S[0,C]0 - S[0,C])
+B[i,C] = CS(S[i,C]), for i >= 1
+
+V:
+// variables at statement n which affects the variables defined by C
+R[0,C](n) = {v | (n = i and v in V) or (for n->m, (v in REF(n) and nil != (DEF(n) intersect R[0,C](m))) or (v not in DEF(n) and v in R[0,C](m)))}
+R[i,C](n) = R[i-1,C](n) union {v | v in R[0,<b, REF(b)>](n) which b in B[i-1,C]}, for i >= 1
+R[C] = UNION R[i,C], for i >= 0
+
+N:
+// slice
+S[0,C] = {n | nil != (DEF(n) intersect R[0,C](n))}
+S[i,C] = {n | (nil != (DEF(n) intersect R[i,C](n))) or (n in B[i-1,C])}, for i >= 1
+S[C] = UNION S[i,C], for i >= 0
