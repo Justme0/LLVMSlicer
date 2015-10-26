@@ -1,46 +1,48 @@
-target		= llvm-slicer.so
+# OPTIMIZE: pattern match
+SRCS		= ./src/Callgraph/Callgraph.cpp \
+		  ./src/Kleerer.cpp \
+		  ./src/Languages/LLVM.cpp \
+		  ./src/ModStats.cpp \
+		  ./src/Modifies/Modifies.cpp \
+		  ./src/PointsTo/PointsTo.cpp \
+		  ./src/Slicing/FunctionStaticSlicer.cpp \
+		  ./src/Slicing/PostDominanceFrontier.cpp \
+		  ./src/Slicing/Prepare.cpp \
+		  ./src/Slicing/StaticSlicer.cpp
 
-OBJS		= Callgraph.o Kleerer.o LLVM.o ModStats.o Modifies.o PointsTo.o Prepare.o PostDominanceFrontier.o FunctionStaticSlicer.o StaticSlicer.o
+TARGET		= llvm-slicer.so
+
+OBJS		= Callgraph.o \
+		  Kleerer.o \
+		  LLVM.o \
+		  ModStats.o \
+		  Modifies.o \
+		  PointsTo.o \
+		  Prepare.o \
+		  PostDominanceFrontier.o \
+		  FunctionStaticSlicer.o \
+		  StaticSlicer.o
 
 CC		= g++
-CXXFLAGS	= -DDEBUG_DUMP -DDEBUG_SLICING -DDEBUG_SLICE -fPIC -g -Wall -Wextra -std=c++11 `llvm-config --cxxflags` -c
+CXXFLAGS	= -DDEBUG_DUMP -DDEBUG_SLICING -DDEBUG_SLICE -fPIC -g -Wall -Wextra -std=c++11 `llvm-config --cxxflags`
 
-.PHONY		: all clean
+.PHONY		: all clean depend
 
-all		: $(target)
+all		: depend $(TARGET)
 
-$(target)	: $(OBJS)
+$(TARGET)	: $(OBJS)
 	$(CC) $(OBJS) -shared -g -o $@
 
-Callgraph.o	: ./src/Callgraph/Callgraph.cpp
-	$(CC) $(CXXFLAGS) ./src/Callgraph/Callgraph.cpp
+depend		: .depend
 
-Kleerer.o	: ./src/Kleerer.cpp
-	$(CC) $(CXXFLAGS) ./src/Kleerer.cpp
+.depend		: $(SRCS)
+	rm -f ./.depend
+	$(CC) $(CXXFLAGS) -c -MM $^ > ./.depend;
 
-LLVM.o		: ./src/Languages/LLVM.cpp
-	$(CC) $(CXXFLAGS) ./src/Languages/LLVM.cpp
+%.o		:
+	$(CC) $(CXXFLAGS) -c $< -o $@
 
-ModStats.o	: ./src/ModStats.cpp
-	$(CC) $(CXXFLAGS) ./src/ModStats.cpp
-
-Modifies.o	: ./src/Modifies/Modifies.cpp
-	$(CC) $(CXXFLAGS) ./src/Modifies/Modifies.cpp
-
-PointsTo.o	: ./src/PointsTo/PointsTo.cpp
-	$(CC) $(CXXFLAGS) ./src//PointsTo/PointsTo.cpp
-
-FunctionStaticSlicer.o	: ./src/Slicing/FunctionStaticSlicer.cpp
-	$(CC) $(CXXFLAGS) ./src/Slicing/FunctionStaticSlicer.cpp
-
-PostDominanceFrontier.o	: ./src/Slicing/PostDominanceFrontier.cpp
-	$(CC) $(CXXFLAGS) ./src/Slicing/PostDominanceFrontier.cpp
-
-Prepare.o	: ./src/Slicing/Prepare.cpp
-	$(CC) $(CXXFLAGS) ./src/Slicing/Prepare.cpp
-
-StaticSlicer.o	: ./src/Slicing/StaticSlicer.cpp
-	$(CC) $(CXXFLAGS) ./src/Slicing/StaticSlicer.cpp
+include .depend
 
 clean		:
-	rm -f $(target) *.o
+	rm -f $(TARGET) *.o .depend

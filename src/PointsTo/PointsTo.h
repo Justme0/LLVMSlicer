@@ -53,6 +53,22 @@ public:
 	iterator end() { return C.end(); }
 	Container const& getContainer() const { return C; }
 	Container& getContainer() { return C; }
+
+	void dump() {
+		int cnt = 0;
+		for (auto elem : C) {
+			outs() << "element " << ++cnt << "\n";
+			auto pointer = elem.first;
+			auto pointee_set = elem.second;
+			outs() << pointer.second << ", " << *pointer.first;
+			outs() << " --> \n";
+			for (auto pointee : pointee_set) {
+				outs() << pointee.second << ", " << *pointer.first << "\n";
+			}
+			outs() << "\n#####\n";
+		}
+	}
+
 private:
 	Container C;
 };

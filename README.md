@@ -7,9 +7,9 @@ considered here are all assert_fail function calls (which is effectively every
 place where an assert is in the code).
 
 ## HOWTO
-$ make<br />
-$ cd test<br />
-$ ./test.rb --file example.c<br />
+$ make
+$ cd test
+$ ./test.rb --file example.c
 IR files are example.ll and example_sliced.ll.
 
 Basically, what one needs to do to slice src.o LLVM code into dst.o is:
