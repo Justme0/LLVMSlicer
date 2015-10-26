@@ -12,7 +12,7 @@ $ cd test
 $ ./test.rb --file example.c
 IR files are example.ll and example_sliced.ll.
 
-Basically, what one needs to do to slice src.o LLVM code into dst.o is:
+Basically, what one needs to do to slice src.o LLVM code into dst.o is:<br />
   $ opt -load LLVMSlicer.so -create-hammock-cfg -slice-inter src.o -o dst.o
 
 Both create-hammock-cfg and slice-inter are defined in this project. If you are
