@@ -17,3 +17,6 @@ LLVMSlicer
 *.so
 llvm-slicer
 .depend
+
+*.aux
+*.log

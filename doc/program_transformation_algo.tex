@@ -77,28 +77,29 @@
         \If {$B\ is\ loop\ header$}
           \State {$LS \gets loop\ structure\ of\ B$}
           \State {$add\ LS\ to\ ret$}
-        \Else \Comment{B is conditional branch or switch}
+          \State {$skip\ blocks\ in\ LS$}
+        \ElsIf {$B\ is\ conditional\ branch\ block$} \Comment{B is 'if' or 'switch' condition block}
           \State {$B' \gets postdominator\ of\ B$}
-          \State {}
+          \State {$construct\ a\ conditional\ structure\ CS\ using\ blocks\ between\ B\ and\ B'$}
+          \State {$add\ CS\ to\ ret$}
+          \State {$skip\ blocks\ in\ CS$}
         \EndIf
       \EndFor
-      \State {$$}
+      \State {$\textbf{return} ret$}
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
 
-%TODO
-%\renewcommand{\thealgorithm}{}
-%\begin{algorithm}
-%  \caption{design of ControlStruct class}
-%  \begin{algorithmic}[1]
-%    \State \textbf{class} ControlStruct \{
-%    \State \textbf{public}:
-%    \State bool isTransformable();
-%    \State 
-%    \State 
-%    \State \}
-%  \end{algorithmic}
-%\end{algorithm}
+\begin{algorithm}
+  \caption{design of ControlStruct class}
+  \begin{algorithmic}[1]
+    \State \textbf{class} ControlStruct \{
+    \State \textbf{public}:
+    \State bool isTransformable();
+    \State
+    \State
+    \State \};
+  \end{algorithmic}
+\end{algorithm}
 
 \end{document}
