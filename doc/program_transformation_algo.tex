@@ -1,9 +1,23 @@
 \documentclass{article}
+
 \usepackage{listings}
+\usepackage{xcolor}
 \usepackage{placeins}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+
+\lstset{
+  language=C++,
+  numbers=left,
+  keywordstyle=\color{blue},
+  commentstyle=\color{green},
+  frame=single,
+  breaklines=true,
+  basicstyle=\small,
+}
+
 \title{Program Transformation}
+
 \begin{document}
 \maketitle
 
@@ -33,7 +47,7 @@
       \Else
         \State $controlStructs \gets getTopLevelControlStructs(S.BList)$
         \ForAll {$S' \in controlStructs$}
-          \State $analyse(S')$ \Comment{do recursive transformation}
+          \State $analyse(S')$ \Comment{do recursive analysis}
         \EndFor
       \EndIf
     \EndFunction
@@ -71,27 +85,37 @@
 \end{algorithm}
 
 \begin{algorithm}
+  \caption{get a conditional structure from the conditional branch block}
+  \begin{algorithmic}[1]
+    \Function {getCondStruct}{$B$}
+      \State {$B' \gets postdominator\ of\ B$}
+      \State {$blocks \gets getBlocksBetween(B,\ B')$} \Comment{traverse CFG from B to B'}
+      \State {$S \gets ControlStruct(blocks)$}
+      \State {$\textbf{return}\ S$}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
   \caption{get all of the top level control structures in the basic block list}
   \begin{algorithmic}[1]
     \Function {getTopLevelControlStructs}{$Blist$}
       \State $ret \gets empty\ ControlStruct\ list$
       \ForAll {$B \in BList$}
         \If {$B\ is\ loop\ header$}
-          \State {$LS \gets loop\ structure\ of\ B$}
+          \State {$LS \gets getLoopStruct(B)$}
           \If {$LS\ has\ one\ successor$}
             \State {$add\ LS\ to\ ret$}
-            \State {$skip\ blocks\ in\ LS$}
+            \State {$skipBlocksIn(LS)$}
           \Else
-            \State {$B' \gets postdominator\ of\ B$}
-            \State {$construct\ a\ conditional\ structure\ CS\ using\ blocks\ between\ B\ and\ B'$}
+            \State {$CS \gets getCondStruct(B)$}
             \State {$add\ CS\ to\ ret$}
-            \State {$skip\ blocks\ in\ CS$}
+            \State {$skipBlocksIn(CS)$}
           \EndIf
         \ElsIf {$B\ is\ conditional\ branch\ block$} \Comment{B is 'if' or 'switch' conditional block}
-          \State {$B' \gets postdominator\ of\ B$}
-          \State {$construct\ a\ conditional\ structure\ CS\ using\ blocks\ between\ B\ and\ B'$}
+          \State {$CS \gets getCondStruct(B)$}
           \State {$add\ CS\ to\ ret$}
-          \State {$skip\ blocks\ in\ CS$}
+          \State {$skipBlocksIn(CS)$}
         \EndIf
       \EndFor
       \State {$\textbf{return}\ ret$}
@@ -100,60 +124,35 @@
 \end{algorithm}
 
 \FloatBarrier
-design of ControlStruct class
-\begin{lstlisting}[languag=C++]
+\section*{Design of ControlStruct class}
+\begin{lstlisting}
 class ControlStruct {
   vector<BasicBlock *> blocks;
   BasicBlock *header;
   BasicBlock *exit;
 
 public:
-  ControlStruct(vector<BasicBlock *> basicblocks) :
-    blocks(basicblocks),
-    {
-  }
+  ControlStruct(const vector<BasicBlock *> &basicblocks);
+
+  bool isTransformable() const;
+
+  Type getType() const; // Condition or Loop
+
+  vector<ControlStruct> getTopLevelControlStructs() const;
+
+  static vector<ControlStruct> getTopLevelControlStructs(const Function &F);
 }
 \end{lstlisting}
 
-\renewcommand{\thealgorithm}{}
-\begin{algorithm}
-  \caption{design of ControlStruct class}
-  \begin{algorithmic}[1]
-    \State \textbf{class} ControlStruct \{
-    \State vector\textless BasicBlock *\textgreater\ Blocks;
-    \State
-    \State \textbf{public}:
-    \State ControlStruct(vector() \{
-    \State \}
-    \State
-    \State bool isTransformable();
-    \State
-    \State Type getType();\Comment{Condition or Loop}
-    \State
-    \State vector\textless ControlStruct\textgreater\ getTopLevelControlStructs();
-    \State
-    \State static vector\textless ControlStruct\textgreater\ getTopLevelControlStructs(Function F);
-    \State \};
-  \end{algorithmic}
-\end{algorithm}
+\section*{Design of Transformation class}
+\begin{lstlisting}
+class Transformation {
+public:
+static void analyse(Module &M);
 
-\begin{algorithm}
-  \caption{design of Transformation class}
-  \begin{algorithmic}[1]
-    \State \textbf{class} Transformation \{
-    \State \textbf{public}:
-    \State static analyse(Module M);
-    \State
-    \State static analyse(ControlStruct S);
-    \State
-    \State static transform(ControlStruct S);
-    \State \};
-  \end{algorithmic}
-\end{algorithm}
+static void analyse(ControlStruct &S);
 
-\begin{lstlisting}[language=C++]
-for (int i=0; i<iterations;i++) {
-  do something
+static void transform(ControlStruct &S);
 }
 \end{lstlisting}
 
