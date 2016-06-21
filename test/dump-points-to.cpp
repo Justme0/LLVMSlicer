@@ -1,11 +1,11 @@
-#include <memory>
 #include <iostream>
-#include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Function.h>
+#include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IRReader/IRReader.h>
-#include <llvm/Support/raw_ostream.h>
 #include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/raw_ostream.h>
+#include <memory>
 
 #include "../src/PointsTo/PointsTo.h"
 
@@ -13,78 +13,74 @@ using namespace llvm;
 
 typedef ptr::PointsToSets::PointsToSet PTSet;
 
-static void pointsTo(const PTSet &P)
-{
-	for (PTSet::const_iterator I = P.begin(), E = P.end(); I != E; ++I) {
-		errs() << "\t OFF=" << I->second << " of";
-		I->first->dump();
-	}
+static void pointsTo(const PTSet &P) {
+  for (PTSet::const_iterator I = P.begin(), E = P.end(); I != E; ++I) {
+    errs() << "\t OFF=" << I->second << " of";
+    I->first->dump();
+  }
 }
 
-static void pointsTo(const Value &val, const ptr::PointsToSets &PS)
-{
-	pointsTo(ptr::getPointsToSet(&val, PS));
+static void pointsTo(const Value &val, const ptr::PointsToSets &PS) {
+  pointsTo(ptr::getPointsToSet(&val, PS));
 }
 
-static void pointsTo(Module &M)
-{
-	ptr::PointsToSets PS;
-	ptr::ProgramStructure progStruct(M);
-	computePointsToSets(progStruct, PS);
+static void pointsTo(Module &M) {
+  ptr::PointsToSets PS;
+  ptr::ProgramStructure progStruct(M);
+  computePointsToSets(progStruct, PS);
 
-	for (Module::const_iterator I = M.begin(), E = M.end(); I != E; ++I) {
-		const Function &F = *I;
-		if (F.isDeclaration())
-			continue;
-		errs() << "=========== " << F.getName() << "\n";
-		for (const_inst_iterator II = inst_begin(F), EE = inst_end(F);
-				II != EE; ++II) {
-			const Instruction *ins = &*II;
-			errs() << "PTSTO";
+  for (Module::const_iterator I = M.begin(), E = M.end(); I != E; ++I) {
+    const Function &F = *I;
+    if (F.isDeclaration())
+      continue;
+    errs() << "=========== " << F.getName() << "\n";
+    for (const_inst_iterator II = inst_begin(F), EE = inst_end(F); II != EE;
+         ++II) {
+      const Instruction *ins = &*II;
+      errs() << "PTSTO";
 
-			if (const StoreInst *SI = dyn_cast<StoreInst>(ins)) {
-				errs() << " STORE";
-				SI->dump();
-				pointsTo(*SI->getPointerOperand(), PS);
-			} else {
-				ins->dump();
-				pointsTo(*ins, PS);
-			}
-		}
-		for (ptr::PointsToSets::const_iterator II = PS.begin(),
-				EE = PS.end(); II != EE; ++II) {
-			const ptr::PointsToSets::Pointer &Ptr = II->first;
-			const PTSet &P = II->second;
+      if (const StoreInst *SI = dyn_cast<StoreInst>(ins)) {
+        errs() << " STORE";
+        SI->dump();
+        pointsTo(*SI->getPointerOperand(), PS);
+      } else {
+        ins->dump();
+        pointsTo(*ins, PS);
+      }
+    }
+    for (ptr::PointsToSets::const_iterator II = PS.begin(), EE = PS.end();
+         II != EE; ++II) {
+      const ptr::PointsToSets::Pointer &Ptr = II->first;
+      const PTSet &P = II->second;
 
-			if (Ptr.second == -1)
-				continue;
-			if (const Instruction *ins =
-					dyn_cast<Instruction>(Ptr.first)) {
-				if (ins->getParent()->getParent() != &F)
-					continue;
-				errs() << "PTSTO w/ OFF=" << Ptr.second;
-				Ptr.first->dump();
-				pointsTo(P);
-			}
-		}
-	}
+      if (Ptr.second == -1)
+        continue;
+      if (const Instruction *ins = dyn_cast<Instruction>(Ptr.first)) {
+        if (ins->getParent()->getParent() != &F)
+          continue;
+        errs() << "PTSTO w/ OFF=" << Ptr.second;
+        Ptr.first->dump();
+        pointsTo(P);
+      }
+    }
+  }
 }
 
-int main(int argc, char **argv)
-{
-	if (argc < 2) {
-		std::cout << "Too few arguments." << std::endl;
-		return 1;
-	}
-	LLVMContext context;
-	SMDiagnostic SMD;	// source message diagnostic
-	std::unique_ptr<llvm::Module> pmodule = llvm::parseIRFile(argv[1], SMD, context);
-	if (nullptr == pmodule) {
-		SMD.print(argv[0], errs());
-		return 1;
-	}
+int main(int argc, char **argv) {
+  if (argc < 2) {
+    std::cout << "Too few arguments." << std::endl;
+    return 1;
+  }
+  LLVMContext context;
+  SMDiagnostic SMD; // source message diagnostic
+  std::unique_ptr<llvm::Module> pmodule =
+      llvm::parseIRFile(argv[1], SMD, context);
+  if (nullptr == pmodule) {
+    SMD.print(argv[0], errs());
+    return 1;
+  }
 
-	pointsTo(*pmodule);
+  pointsTo(*pmodule);
 
-	return 0;
+  return 0;
 }

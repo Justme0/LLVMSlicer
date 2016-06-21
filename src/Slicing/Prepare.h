@@ -9,15 +9,15 @@
 #include "llvm/IR/Module.h"
 
 static inline const llvm::ConstantArray *getInitFuns(const llvm::Module &M) {
-	const llvm::GlobalVariable *initFunsVar =
-		M.getGlobalVariable("__ai_init_functions", true);
+  const llvm::GlobalVariable *initFunsVar =
+      M.getGlobalVariable("__ai_init_functions", true);
 
-	if (nullptr == initFunsVar)
-		return nullptr;
+  if (nullptr == initFunsVar)
+    return nullptr;
 
-	const llvm::ConstantArray *initFuns =
-		llvm::dyn_cast<llvm::ConstantArray>(initFunsVar->getInitializer());
-	return initFuns;
+  const llvm::ConstantArray *initFuns =
+      llvm::dyn_cast<llvm::ConstantArray>(initFunsVar->getInitializer());
+  return initFuns;
 }
 
 #endif

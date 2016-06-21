@@ -29,7 +29,7 @@
   \begin{algorithmic}[1]
     \Function {analyse}{$M$}
       \ForAll {$F \in M$}
-        \State $controlStructs \gets getTopLevelControlStructs(F.BList)$ \Comment{ControlStruct is a conditional branch or loop}
+        \State $controlStructs \gets getTopLevelControlStructs(F.BList)$
         \ForAll {$S \in controlStructs$}
           \State $analyse(S)$
         \EndFor
@@ -71,15 +71,17 @@
   \caption{transform a control structure}
   \begin{algorithmic}[1]
     \Function {transform}{$S$}
+      \State $TI \gets S.header.getTerminator$
       \ForAll {$B \in S$}
         \ForAll {$I \in B$}
           \If {$isCritical(I)$} \Comment{check if dereference or getElementOfArray}
-            \State $insert\ I\ before\ S$
+            \State $insert\ I\ before\ TI$
           \EndIf
         \EndFor
       \EndFor
-      \State $B \gets getSuccessor(S)$
-      \State $insert\ unconditional\ branch\ \textbf{br\ label\ B}\ before\ S$
+      \State $B \gets S.exit$
+      \State $I \gets \textbf{br\ label\ B}$
+      \State $replace\ TI\ with\ I$
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
@@ -106,7 +108,7 @@
           \State {$LS \gets getLoopStruct(B)$}
           \If {$LS\ has\ one\ successor$}
             \State {$add\ LS\ to\ ret$}
-            \State {$skipBlocksIn(LS)$}
+            \State {$skipBlocksIn(LS)$} \Comment{don't analyse blocks in LS}
           \Else
             \State {$CS \gets getCondStruct(B)$}
             \State {$add\ CS\ to\ ret$}
@@ -127,12 +129,18 @@
 \section*{Design of ControlStruct class}
 \begin{lstlisting}
 class ControlStruct {
-  vector<BasicBlock *> blocks;
-  BasicBlock *header;
-  BasicBlock *exit;
+  BasicBlock *_header;
+  BasicBlock *_exit;
+  vector<BasicBlock *> _blocks;
 
 public:
-  ControlStruct(const vector<BasicBlock *> &basicblocks);
+  ControlStruct(BasicBlock *header,
+                BasicBlock *exit,
+                const vector<BasicBlock *> &blocks);
+
+  BasicBlock *header();
+
+  BasicBlock *exit();
 
   bool isTransformable() const;
 
@@ -148,11 +156,11 @@ public:
 \begin{lstlisting}
 class Transformation {
 public:
-static void analyse(Module &M);
+  static void analyse(Module &M);
 
-static void analyse(ControlStruct &S);
+  static void analyse(ControlStruct &S);
 
-static void transform(ControlStruct &S);
+  static void transform(ControlStruct &S);
 }
 \end{lstlisting}
 

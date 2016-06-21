@@ -24,7 +24,8 @@ OBJS		= Callgraph.o \
 		  StaticSlicer.o
 
 CC		= g++
-CXXFLAGS	= -DDEBUG_DUMP -DDEBUG_SLICING -DDEBUG_SLICE -fPIC -g -Wall -Wextra -std=c++11 `llvm-config --cxxflags`
+#CXXFLAGS	= -DPS_DEBUG -DDEBUG_DUMP -DDEBUG_SLICING -DDEBUG_SLICE -fPIC -g -Wall -Wextra -std=c++14 `llvm-config --cxxflags`
+CXXFLAGS	= -fPIC -g -Wall -Wextra -std=c++14 `llvm-config --cxxflags`
 
 .PHONY		: all clean depend
 
@@ -42,7 +43,7 @@ depend		: .depend
 %.o		:
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
-include .depend
-
 clean		:
 	rm -f $(TARGET) *.o .depend
+
+-include .depend

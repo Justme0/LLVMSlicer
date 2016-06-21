@@ -1,0 +1,32 @@
+$ cat global.c
+int g;
+
+int main() {
+	int a, b;
+	a = g;
+	g = b;
+
+	return 0;
+}
+$ clang -S -emit-llvm global.c -o global.ll
+$ opt -S -load=../llvm-slicer.so -create-hammock-cfg -slice-inter global.ll -o global_sliced.ll 
+
+==== MODSET DUMP ====
+main
+#0 0x22fdea6 llvm::sys::PrintStackTrace(_IO_FILE*) /home/justme0/Downloads/llvm-3.6.1.src/lib/Support/Unix/Signals.inc:423:0
+#1 0x22fe150 PrintStackTraceSignalHandler(void*) /home/justme0/Downloads/llvm-3.6.1.src/lib/Support/Unix/Signals.inc:481:0
+#2 0x22fcc43 SignalHandler(int) /home/justme0/Downloads/llvm-3.6.1.src/lib/Support/Unix/Signals.inc:198:0
+#3 0x7f41f19c7d10 __restore_rt (/lib/x86_64-linux-gnu/libpthread.so.0+0x10d10)
+#4 0x7f41f093f2b4 llvm::Instruction::getParent() const /usr/local/include/llvm/IR/Instruction.h:54:0
+#5 0x7f41f0946a8b llvm::mods::computeModifies(llvm::mods::ProgramStructure const&, llvm::callgraph::Callgraph const&, llvm::ptr::PointsToSets const&, llvm::mods::Modifies&) /home/justme0/programs/klee-base/tools/llvm-slicer/src/Modifies/Modifies.cpp:94:0
+#6 0x7f41f0970311 (anonymous namespace)::Slicer::runOnModule(llvm::Module&) /home/justme0/programs/klee-base/tools/llvm-slicer/src/Slicing/StaticSlicer.cpp:323:0
+#7 0x22596a5 (anonymous namespace)::MPPassManager::runOnModule(llvm::Module&) /home/justme0/Downloads/llvm-3.6.1.src/lib/IR/LegacyPassManager.cpp:1616:0
+#8 0x2259d68 llvm::legacy::PassManagerImpl::run(llvm::Module&) /home/justme0/Downloads/llvm-3.6.1.src/lib/IR/LegacyPassManager.cpp:1723:0
+#9 0x2259f89 llvm::legacy::PassManager::run(llvm::Module&) /home/justme0/Downloads/llvm-3.6.1.src/lib/IR/LegacyPassManager.cpp:1757:0
+#10 0xcd37fb main /home/justme0/Downloads/llvm-3.6.1.src/tools/opt/opt.cpp:585:0
+#11 0x7f41f0bdca40 __libc_start_main /build/buildd/glibc-2.21/csu/libc-start.c:323:0
+#12 0xc965e9 _start (/usr/local/bin/opt+0xc965e9)
+Stack dump:
+0.	Program arguments: opt -S -load=../llvm-slicer.so -create-hammock-cfg -slice-inter global.ll -o global_sliced.ll 
+1.	Running pass 'Slices the code interprocedurally' on module 'global.ll'.
+fish: Job 1, “opt -S -load=../llvm-slicer.so -create-hammock-cfg -slice-inter global.ll -o global_sliced.ll ” terminated by signal SIGSEGV (Address boundary error)
