@@ -21,3 +21,5 @@ llvm-slicer
 *.aux
 *.log
 *.dvi
+
+LLVMSlicer.obj

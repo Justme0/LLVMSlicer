@@ -51,15 +51,17 @@ src = options[:src]			# e.g. main.c
 base = File.basename("#{src}", ".*")	# main
 ir = base + ".ll"			# main.ll
 
-puts "compiling #{src} to #{ir}...".brown
+puts "Compile #{src} to #{ir}...".brown
 `clang -S -emit-llvm #{src} -o #{ir}`	# OPTIMIZE: maybe unsafe
 abort unless $?.success?
+puts "Down"
 
 ir_sliced = base + "_sliced.ll"		# main_sliced.ll
-puts "slicing #{ir} to #{ir_sliced}...".brown
+puts "Slice #{ir} to #{ir_sliced}...".brown
 # `opt -S -load=../llvm-slicer.so -create-hammock-cfg -slice-inter #{ir} -o #{ir_sliced}`
 `opt -S -load=../llvm-slicer.so -slice-inter #{ir} -o #{ir_sliced}`
 abort unless $?.success?
+puts "Down"
 
 puts "\nfinished".green
 puts "source file       : #{src}"

@@ -37,13 +37,17 @@ $(TARGET)	: $(OBJS)
 depend		: .depend
 
 .depend		: $(SRCS)
-	rm -f ./.depend
-	$(CC) $(CXXFLAGS) -c -MM $^ > ./.depend;
+	rm -f $@
+	$(CC) $(CXXFLAGS) -c -MM $^ > $@
+
+# http://stackoverflow.com/questions/3714041/why-does-this-makefile-execute-a-target-on-make-clean
+# http://stackoverflow.com/questions/28895439/the-function-of-the-ifneq-makecmdgoals-clean-part-in-the-makefile
+ifneq ($(MAKECMDGOALS),clean)
+-include .depend
+endif
 
 %.o		:
 	$(CC) $(CXXFLAGS) -c $< -o $@
 
 clean		:
 	rm -f $(TARGET) *.o .depend
-
--include .depend
