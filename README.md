@@ -8,6 +8,8 @@ place where an assert is in the code).
 
 ## HOWTO
 ```bash
+$ git clone https://github.com/Justme0/LLVMSlicer.git
+$ cd LLVMSlicer
 $ make
 $ cd test
 $ ./test.rb --file example.c
