@@ -7,13 +7,18 @@ considered here are all assert_fail function calls (which is effectively every
 place where an assert is in the code).
 
 ## HOWTO
+```bash
 $ make
 $ cd test
 $ ./test.rb --file example.c
+```
+
 IR files are example.ll and example_sliced.ll.
 
-Basically, what one needs to do to slice src.o LLVM code into dst.o is:
-  $ opt -load LLVMSlicer.so -create-hammock-cfg -slice-inter src.o -o dst.o
+Or you can run slicing manually. Basically, what one needs to do to slice src.o LLVM code into dst.o is:
+```bash
+$ opt -load LLVMSlicer.so -create-hammock-cfg -slice-inter src.o -o dst.o
+```
 
 Both create-hammock-cfg and slice-inter are defined in this project. If you are
 having troubles with running opt, you are likely not loading the proper library.
@@ -25,6 +30,9 @@ LD_LIBRARY_PATH).
 Use github for reports and pull requests, please.
 
 ## Contacts
+Justme0 <jiangg2012@hotmail.com>
+http://justme0.com
+
 Jiri Slaby <jirislaby@gmail.com>
 https://github.com/jirislaby/LLVMSlicer
 
