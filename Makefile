@@ -24,26 +24,22 @@ OBJS		= Callgraph.o \
 		  StaticSlicer.o
 
 CC		= g++
-#CXXFLAGS	= -DPS_DEBUG -DDEBUG_DUMP -DDEBUG_SLICING -DDEBUG_SLICE -fPIC -g -Wall -Wextra -std=c++14 `llvm-config --cxxflags`
-CXXFLAGS	= -fPIC -g -Wall -Wextra -std=c++14 `llvm-config --cxxflags`
+CXXFLAGS	= -g -Wall -Wextra -std=c++14 `llvm-config --cxxflags`
+#CXXFLAGS	= -g -Wall -Wextra -std=c++14 `llvm-config --cxxflags` -DPS_DEBUG -DDEBUG_DUMP -DDEBUG_SLICING -DDEBUG_SLICE
 
-.PHONY		: all clean depend
+.PHONY		: all clean
 
-all		: depend $(TARGET)
-
-$(TARGET)	: $(OBJS)
-	$(CC) $(OBJS) -shared -g -o $@
-
-depend		: .depend
+all		: .depend $(TARGET)
 
 .depend		: $(SRCS)
 	rm -f $@
 	$(CC) $(CXXFLAGS) -c -MM $^ > $@
 
-# http://stackoverflow.com/questions/3714041/why-does-this-makefile-execute-a-target-on-make-clean
-# http://stackoverflow.com/questions/28895439/the-function-of-the-ifneq-makecmdgoals-clean-part-in-the-makefile
+$(TARGET)	: $(OBJS)
+	$(CC) $(OBJS) -shared -g -o $@
+
 ifneq ($(MAKECMDGOALS),clean)
--include .depend
+  -include .depend
 endif
 
 %.o		:
