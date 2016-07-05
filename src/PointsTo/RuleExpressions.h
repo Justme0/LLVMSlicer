@@ -147,11 +147,6 @@ template <typename MemLoc>
 RuleExpression<NULLPTR<MemLoc>> ruleNull(MemLoc const ml) {
   return RuleExpression<NULLPTR<MemLoc>>(NULLPTR<MemLoc>(ml));
 }
-}
-}
-
-namespace llvm {
-namespace ptr {
 
 enum RuleCodeType {
   RCT_UNKNOWN = 0,
@@ -244,11 +239,7 @@ template <typename ExprSort>
 RuleCode ruleCode(RuleExpression<ExprSort> const &E) {
   return RuleCode(E.getSort());
 }
-}
-}
 
-namespace llvm {
-namespace ptr {
 namespace detail {
 
 template <typename OutIterator>
@@ -347,6 +338,7 @@ void toRuleCode(const Value *V, OutIterator out) {
       }
     } else if (const llvm::IntToPtrInst *ITPI =
                    llvm::dyn_cast<llvm::IntToPtrInst>(I)) {
+      (void)ITPI;
       // errs() << __func__ << ": WARNING[PointsTo]: Integer ";
       //
       // if (const llvm::ConstantInt *C =
@@ -382,8 +374,9 @@ void toRuleCode(const Value *V, OutIterator out) {
     *out++ = ruleCode(ruleVar(V) = &ruleVar(op));
   }
 }
-}
-}
-}
+
+} // end namespace detail
+} // end namespace ptr
+} // end namespace llvm
 
 #endif

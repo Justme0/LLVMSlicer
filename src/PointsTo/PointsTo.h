@@ -77,11 +77,6 @@ public:
 private:
   Container C;
 };
-}
-}
-
-namespace llvm {
-namespace ptr {
 
 struct ProgramStructure {
   typedef RuleCode Command;
@@ -107,18 +102,14 @@ private:
   Container C;
   const llvm::Module &M;
 };
-}
-}
-
-namespace llvm {
-namespace ptr {
 
 const PointsToSets::PointsToSet &
 getPointsToSet(const llvm::Value *const &memLoc, const PointsToSets &S,
                const int offset = -1);
 
 PointsToSets &computePointsToSets(const ProgramStructure &P, PointsToSets &S);
-}
-}
+
+} // end namespace ptrs
+} // end namespace llvm
 
 #endif
