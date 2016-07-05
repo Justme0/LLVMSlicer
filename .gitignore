@@ -24,3 +24,4 @@ llvm-slicer
 
 LLVMSlicer.obj
 build
+*ycm_extra_conf.py*
